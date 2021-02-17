@@ -6,6 +6,7 @@
 using namespace glm;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 
 const GLuint WIDTH = 800, HEIGHT = 600;
 
@@ -31,6 +32,7 @@ int main()
     }
 
     glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -59,4 +61,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     std::cout << key << std::endl;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
 }
