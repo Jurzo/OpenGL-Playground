@@ -39,7 +39,7 @@
                 "-std=c++17",
                 "${workspaceFolder}/test.cpp",
                 "-o",
-                "${fileDirname}/test.exe",
+                "${workspaceFolder}/test.exe",
                 "${workspaceFolder}/glad.c",
                 "-I",
                 "${workspaceFolder}/include",

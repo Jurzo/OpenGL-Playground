@@ -108,14 +108,15 @@ int main()
 
     // Creating a square from vertices
     float vertices[] = {
-        0.5f, 0.5f, 0.0f,   // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f   // top left
+        0.9f, 0.9f, 0.0f,   // top right
+        0.9f, -0.9f, 0.0f,  // bottom right
+        0.0f, -0.9f, 0.0f, // center
+        -0.9f, 0.9f, 0.0f, // top left
+        -0.9f, -0.9f, 0.0f // bottom left
     };
     unsigned int indices[] = {
-        0,1,3,      // first triangle
-        1,2,3       // second triangle
+        0,1,2,      // first triangle
+        2,3,4       // second triangle
     };
 
     unsigned int VBO, VAO, EBO;
@@ -142,7 +143,7 @@ int main()
     std::cout << glGetString(GL_VERSION);
 
     // change to wireframe draws
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -158,6 +159,10 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
     return 0;
