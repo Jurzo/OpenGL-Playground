@@ -12,16 +12,20 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 460 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
+                                 "uniform vec4 ourColor;\n"
+                                 "out vec4 color;\n"
                                  "void main()\n"
                                  "{\n"
                                  "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                "    color = ourColor;\n"
                                  "}\0";
 
 const char *fragmentShaderSource = "#version 460 core\n"
                                    "out vec4 FragColor;\n"
+                                   "in vec4 color;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                   "   FragColor = color;\n"
                                    "}\0";
 
 int main()
@@ -108,28 +112,18 @@ int main()
 
     // Creating a square from vertices
     float vertices[] = {
-        0.9f, 0.9f, 0.0f,   // top right
+        0.0f, 0.9f, 0.0f,   // top
         0.9f, -0.9f, 0.0f,  // bottom right
-        0.0f, -0.9f, 0.0f, // center
-        -0.9f, 0.9f, 0.0f, // top left
-        -0.9f, -0.9f, 0.0f // bottom left
-    };
-    unsigned int indices[] = {
-        0,1,2,      // first triangle
-        2,3,4       // second triangle
+        -0.9f, -0.9f, 0.0f   // bottom left
     };
 
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Tell OpenGL how to interpret vertex data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
@@ -152,8 +146,18 @@ int main()
 
         // Draw the triangle
         glUseProgram(shaderProgram);
+
+        float timeValue = glfwGetTime();
+        float greenValue = sin(timeValue) / 2.0f + 0.5f;
+        float blueValue = sin(timeValue + 2.0f) / 2.0f + 0.5f;
+        float redValue = sin(timeValue + 4.0f) / 2.0f + 0.5;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glUniform4f(vertexColorLocation, redValue, greenValue, blueValue, 1.0f);
+
+        std::cout << redValue << greenValue << blueValue << std::endl;
+
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -161,7 +165,6 @@ int main()
     }
 
     glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &EBO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
