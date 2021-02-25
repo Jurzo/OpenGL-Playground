@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 using namespace glm;
+#include <shader.h>
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -60,55 +61,7 @@ int main()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    // build and compile our shader program
-    // ------------------------------------
-    // vertex shader
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION::FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    // fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    //check for errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION::FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    // Linking shaders into a shader program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // Check for errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING::FAILED\n"
-                  << infoLog << std::endl;
-    }
-    // Delete shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader ourShader("shaders/4.6.shader.vs", "shaders/4.6.shader.fs");
 
     // Creating a square from vertices
     float vertices[] = {
@@ -145,16 +98,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw the triangle
-        glUseProgram(shaderProgram);
+        ourShader.use();
 
         float timeValue = glfwGetTime();
         float greenValue = sin(timeValue) / 2.0f + 0.5f;
         float blueValue = sin(timeValue + 2.0f) / 2.0f + 0.5f;
         float redValue = sin(timeValue + 4.0f) / 2.0f + 0.5;
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(vertexColorLocation, redValue, greenValue, blueValue, 1.0f);
-
-        std::cout << redValue << greenValue << blueValue << std::endl;
+        ourShader.set3f("ourColor", vec3(redValue, greenValue, blueValue));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
