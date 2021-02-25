@@ -61,7 +61,7 @@ int main()
 
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    Shader ourShader("shaders/4.6.shader.vs", "shaders/4.6.shader.fs");
+    Shader ourShader("/shaders/4.6.shader.vs", "/shaders/4.6.shader.fs");
 
     // Creating a square from vertices
     float vertices[] = {
