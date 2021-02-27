@@ -48,9 +48,10 @@ int main()
     Shader ourShader("shaders/4.6.shader.vs", "shaders/4.6.shader.fs");
 
     // create texture
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); // bind texture
+    stbi_set_flip_vertically_on_load(true); // flip images
+    unsigned int texture1, texture2;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1); // bind texture
     // set texture wrapping on currently bound texture
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -58,7 +59,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // loading and generate texture
+    // loadand generate texture
     int width, height, nrChannels;
     unsigned char *data = stbi_load("src/container.jpg", &width, &height, &nrChannels, 0);
 
@@ -69,9 +70,34 @@ int main()
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture 1" << std::endl;
+    }
+    // texture 2
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2); // bind texture
+    // set texture wrapping on currently bound texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering on currently bound texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("src/awesomeface.png", &width, &height, &nrChannels, 0);
+
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture 2" << std::endl;
     }
     stbi_image_free(data); // free image data
+    // setting texture uniforms
+    ourShader.use();
+    ourShader.set1i("texture1", 0);
+    ourShader.set1i("texture2", 1);
 
     // Square with color and texture data
     float vertices[] = {
@@ -133,7 +159,10 @@ int main()
         ourShader.set3f("offset", offset);
         ourShader.set3f("ourColor", vec3(redValue, greenValue, blueValue)); */
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
