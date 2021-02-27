@@ -9,7 +9,7 @@
                 "-std=c++17",
                 "${workspaceFolder}/main.cpp",
                 "-o",
-                "${fileDirname}/main.exe",
+                "${workspaceFolder}/main.exe",
                 "${workspaceFolder}/include/glad.c",
                 "-I",
                 "${workspaceFolder}/include",
