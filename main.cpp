@@ -3,6 +3,8 @@
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 using namespace glm;
 #include <shader.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -159,6 +161,16 @@ int main()
         ourShader.set3f("offset", offset);
         ourShader.set3f("ourColor", vec3(redValue, greenValue, blueValue)); */
 
+        double time = glfwGetTime();
+
+        // vector transformation with matrices
+        mat4 trans = mat4(1.0f);
+        trans = translate(trans, vec3(0.5, -0.5, 0.0));
+        trans = rotate(trans, (float) time, vec3(1.0, 1.0, 1.0));
+
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(trans));
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
@@ -166,6 +178,16 @@ int main()
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        trans = mat4(1.0f);
+        trans = translate(trans, vec3(-0.5, 0.5, 0.0));
+        trans = scale(trans, vec3(sin(time), cos(time), 1.0));
+
+        transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(trans));
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
