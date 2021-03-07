@@ -141,6 +141,21 @@ int main()
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    // 3D matrix transformations
+    // model
+    mat4 model = mat4(1.0f);
+    model = rotate(model, radians(-55.0f), vec3(1.0f, 1.0f, 0.0f));
+    // view
+    mat4 view = mat4(1.0f);
+    view = translate(view, vec3(0.0f, 0.0f, -3.0f));
+    // perspective projection matrix
+    mat4 projection;
+    projection = perspective(radians(55.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
+    // set uniforms
+    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "model"), 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "view"), 1, GL_FALSE, value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "projection"), 1, GL_FALSE, value_ptr(projection));
+
     std::cout << glGetString(GL_VERSION);
 
     // change to wireframe draws
@@ -161,31 +176,12 @@ int main()
         ourShader.set3f("offset", offset);
         ourShader.set3f("ourColor", vec3(redValue, greenValue, blueValue)); */
 
-        double time = glfwGetTime();
-
-        // vector transformation with matrices
-        mat4 trans = mat4(1.0f);
-        trans = translate(trans, vec3(0.5, -0.5, 0.0));
-        trans = rotate(trans, (float) time, vec3(1.0, 1.0, 1.0));
-
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(trans));
-
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        trans = mat4(1.0f);
-        trans = translate(trans, vec3(-0.5, 0.5, 0.0));
-        trans = scale(trans, vec3(sin(time), cos(time), 1.0));
-
-        transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(trans));
-
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         glBindVertexArray(0);
