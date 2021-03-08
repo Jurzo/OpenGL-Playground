@@ -122,6 +122,10 @@ public:
     {
         glUniform3f(glGetUniformLocation(ID, name.c_str()), values.x, values.y, values.z);
     }
+    void setmatrix4(const std::string &name, mat4 values) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, value_ptr(values));
+    }
 };
 
 #endif

@@ -152,9 +152,9 @@ int main()
     mat4 projection;
     projection = perspective(radians(55.0f), (float) WIDTH / (float) HEIGHT, 0.1f, 100.0f);
     // set uniforms
-    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "model"), 1, GL_FALSE, value_ptr(model));
-    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "view"), 1, GL_FALSE, value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "projection"), 1, GL_FALSE, value_ptr(projection));
+    ourShader.setmatrix4("model", model);
+    ourShader.setmatrix4("view", view);
+    ourShader.setmatrix4("projection", projection);
 
     std::cout << glGetString(GL_VERSION);
 
