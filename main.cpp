@@ -27,7 +27,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window;
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Tutorial 01", NULL, NULL);
+    window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Practice", NULL, NULL);
     glfwMakeContextCurrent(window);
     if (window == NULL)
     {
@@ -61,7 +61,10 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // loadand generate texture
+    // enable depth test
+    glEnable(GL_DEPTH_TEST);
+
+    // load and generate texture
     int width, height, nrChannels;
     unsigned char *data = stbi_load("src/container.jpg", &width, &height, &nrChannels, 0);
 
@@ -188,7 +191,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ourShader.use();
 
@@ -202,7 +205,7 @@ int main()
 
         // Rotate the cube over time
         model = mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(55.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(55.0f), glm::vec3(0.0f, 0.5f, 1.0f));
         ourShader.setmatrix4("model", model);
 
         glActiveTexture(GL_TEXTURE0);
