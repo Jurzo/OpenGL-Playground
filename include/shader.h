@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
@@ -118,13 +120,13 @@ public:
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
-    void set3f(const std::string &name, vec3 values) const
+    void set3f(const std::string &name, glm::vec3 values) const
     {
         glUniform3f(glGetUniformLocation(ID, name.c_str()), values.x, values.y, values.z);
     }
-    void setmatrix4(const std::string &name, mat4 values) const
+    void setmatrix4(const std::string &name, glm::mat4 values) const
     {
-        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, value_ptr(values));
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(values));
     }
 };
 
