@@ -163,9 +163,15 @@ int main() {
         lightingShader.use();
 
         // set lighting shader uniforms
-        lightingShader.set3f("lightPos", lightPos);  
-        lightingShader.set3f("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        lightingShader.set3f("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        lightingShader.set3f("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        lightingShader.set3f("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        lightingShader.set3f("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        lightingShader.set1f("material.shininess", 32.0f);
+
+        lightingShader.set3f("light.position", lightPos);
+        lightingShader.set3f("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+        lightingShader.set3f("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+        lightingShader.set3f("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         // pass projection matrix to shader
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
