@@ -25,8 +25,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;  // Time between current frame and last frame
 float lastFrame = 0.0f;  // Time of last frame
 
-// light position
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+float lightDist = 6.0f;
 
 int main() {
     if (!glfwInit()) {
@@ -157,6 +156,9 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // light position
+        glm::vec3 lightPos(sin(glfwGetTime()) * lightDist, 1.0f, cos(glfwGetTime()) * lightDist);
+
         // activate shader
         lightingShader.use();
 
@@ -174,6 +176,7 @@ int main() {
         lightingShader.setmatrix4("view", view);
 
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 1.5f));
         lightingShader.setmatrix4("model", model);
 
         glBindVertexArray(VAO);
@@ -184,6 +187,7 @@ int main() {
         lightCubeShader.setmatrix4("projection", projection);
         lightCubeShader.setmatrix4("view", view);
 
+        model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lightCubeShader.setmatrix4("model", model);
