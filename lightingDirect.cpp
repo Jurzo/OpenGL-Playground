@@ -68,7 +68,7 @@ int main() {
     // enable depth test
     glEnable(GL_DEPTH_TEST);
 
-    Shader lightingShader("shaders/lightingshader.vs", "shaders/flashlight.fs");
+    Shader lightingShader("shaders/directionlight.vs", "shaders/directionlight.fs");
     Shader lightCubeShader("shaders/lightingshader.vs", "shaders/lightcube.fs");
 
     // load and generate textures
@@ -190,16 +190,11 @@ int main() {
         // activate shader
         lightingShader.use();
 
+        lightingShader.set3f("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+
         lightingShader.set1f("material.shininess", 64.0f);
 
-        lightingShader.set3f("lightdir", camera.Front);
-        lightingShader.set1f("light.cutOff",   glm::cos(glm::radians(12.5f)));
-
-        lightingShader.set1f("light.constant", 1.0f);
-        lightingShader.set1f("light.linear", 0.09f);
-        lightingShader.set1f("light.quadratic", 0.032f);
-
-        lightingShader.set3f("lightPos", camera.Position);
+        lightingShader.set3f("lightPos", lightPos);
         lightingShader.set3f("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         lightingShader.set3f("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
         lightingShader.set3f("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));

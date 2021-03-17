@@ -76,9 +76,9 @@ class Camera {
         if (direction == RIGHT)
             Position += Right * velocity;
         if (direction == UP)
-            Position += Up * velocity;
+            Position += velocity * glm::vec3(0.0f, 1.0f, 0.0f);
         if (direction == DOWN)
-            Position -= Up * velocity;
+            Position -= velocity * glm::vec3(0.0f, 1.0f, 0.0f);
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
