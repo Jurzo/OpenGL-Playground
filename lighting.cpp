@@ -194,8 +194,9 @@ int main() {
 
         lightingShader.set3f("lightdir", camera.Front);
         lightingShader.set1f("light.cutOff",   glm::cos(glm::radians(12.5f)));
+        lightingShader.set1f("light.outerCutOff",   glm::cos(glm::radians(20.0f)));
 
-        lightingShader.set1f("light.constant", 1.0f);
+        lightingShader.set1f("light.constant", 0.5f);
         lightingShader.set1f("light.linear", 0.09f);
         lightingShader.set1f("light.quadratic", 0.032f);
 
