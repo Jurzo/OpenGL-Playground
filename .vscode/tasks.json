@@ -9,7 +9,7 @@
                 "-std=c++17",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "${fileDirname}/builds/${fileBasenameNoExtension}.exe",
                 "${workspaceFolder}/include/glad.c",
                 "-I",
                 "${workspaceFolder}/include",
@@ -34,7 +34,7 @@
             "type": "shell",
             "label": "run",
             "dependsOn": "C/C++: g++.exe build current file",
-            "command": "${fileDirname}/${fileBasenameNoExtension}.exe",
+            "command": "${fileDirname}/builds/${fileBasenameNoExtension}.exe",
             "args": [],
             "presentation": {
                 "echo": true,
