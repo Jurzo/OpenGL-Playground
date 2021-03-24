@@ -70,7 +70,7 @@ int main() {
     // enable depth test
     glEnable(GL_DEPTH_TEST);
 
-    Shader lightingShader("shaders/multilight.vs", "shaders/multilight.fs");
+    Shader lightingShader("shaders/multilight.vs", "shaders/multilight_alpha.fs");
 
     glm::vec3 pointLightPositions[] = {
         glm::vec3(0.7f, 0.2f, 2.0f),
@@ -86,15 +86,12 @@ int main() {
         glm::vec3(0.3f, 0.1f, 0.1f)
     };
 
-    Model backpack("res/backpack.obj");
+    Model tree("res/tree/Tree.obj");
 
     std::cout << glGetString(GL_VERSION);
 
     // change to wireframe draws
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    // activate shader
-    lightingShader.use();
 
     while (!glfwWindowShouldClose(window)) {
         // frame time logic
@@ -144,7 +141,7 @@ int main() {
         // set directional light uniforms
         lightingShader.set3f("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
         lightingShader.set3f("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-        lightingShader.set3f("dirLight.diffuse", glm::vec3(0.05f, 0.05f, 0.05));
+        lightingShader.set3f("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5));
         lightingShader.set3f("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
 
         // set spotlight uniforms
@@ -172,7 +169,7 @@ int main() {
         glm::mat4 model(1.0f);
         lightingShader.setmatrix4("model", model);
 
-        backpack.Draw(lightingShader);
+        tree.Draw(lightingShader);
 
         glBindVertexArray(0);
 
