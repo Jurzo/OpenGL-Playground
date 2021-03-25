@@ -50,7 +50,7 @@ uniform vec3 viewPos;
 uniform Material material;
 
 uniform DirLight dirLight;
-#define NR_POINT_LIGHTS 4  
+#define NR_POINT_LIGHTS 4
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
 
@@ -65,16 +65,16 @@ void main() {
     vec3 norm = normalize(Normal);
 
     if (!gl_FrontFacing) {
-        norm = normalize(-Normal);
+        norm = -norm;
     }
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
 
-    for (int i = 0; i < NR_POINT_LIGHTS; i++) {
+    /* for (int i = 0; i < NR_POINT_LIGHTS; i++) {
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
-    }
+    } */
 
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 

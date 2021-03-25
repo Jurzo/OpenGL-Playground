@@ -72,21 +72,21 @@ int main() {
 
     Shader lightingShader("shaders/multilight.vs", "shaders/multilight_alpha.fs");
 
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(0.7f, 0.2f, 2.0f),
-        glm::vec3(2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f, 2.0f, -12.0f),
-        glm::vec3(0.0f, 0.0f, -3.0f)
-    };
-
-    glm::vec3 pointLightColors[] = {
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        glm::vec3(0.1f, 0.1f, 0.1f),
-        glm::vec3(0.3f, 0.1f, 0.1f)
-    };
-
     Model tree("res/tree/Tree.obj");
+    Model ground("res/ground/ground.obj");
+    Model chair("res/chair/chair.obj");
+
+    glm::vec3 treePositions[] {
+        glm::vec3(3.0f, 0.0f, 3.0f),
+        glm::vec3(-4.0f, 0.0f, -3.0f),
+        glm::vec3(4.0f, 0.0f, -4.0f)
+    };
+
+    glm::vec3 chairPositions[] {
+        glm::vec3(3.5f, 0.0f, 0.0f),
+        glm::vec3(-3.5f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, -3.5f)
+    };
 
     std::cout << glGetString(GL_VERSION);
 
@@ -113,36 +113,11 @@ int main() {
         lightingShader.set3f("viewPos", camera.Position);
         lightingShader.set1f("material.shininess", 64.0f);
 
-        // set point light uniforms
-        for (int i = 0; i < 4; i++) {
-            char buffer[64];
-            sprintf(buffer, "pointLights[%i].position", i);
-            lightingShader.set3f(buffer, pointLightPositions[i]);
-
-            sprintf(buffer, "pointLights[%i].ambient", i);
-            lightingShader.set3f(buffer, pointLightColors[i] * 0.3f);
-
-            sprintf(buffer, "pointLights[%i].diffuse", i);
-            lightingShader.set3f(buffer, pointLightColors[i]);
-
-            sprintf(buffer, "pointLights[%i].specular", i);
-            lightingShader.set3f(buffer, pointLightColors[i]);
-
-            sprintf(buffer, "pointLights[%i].constant", i);
-            lightingShader.set1f(buffer, 1.0f);
-
-            sprintf(buffer, "pointLights[%i].linear", i);
-            lightingShader.set1f(buffer, 0.14f);
-
-            sprintf(buffer, "pointLights[%i].quadratic", i);
-            lightingShader.set1f(buffer, 0.07f);
-        }
-
         // set directional light uniforms
         lightingShader.set3f("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
         lightingShader.set3f("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
         lightingShader.set3f("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5));
-        lightingShader.set3f("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+        lightingShader.set3f("dirLight.specular", glm::vec3(0.05f, 0.05f, 0.05f));
 
         // set spotlight uniforms
         lightingShader.set3f("spotLight.position", camera.Position);
@@ -169,7 +144,26 @@ int main() {
         glm::mat4 model(1.0f);
         lightingShader.setmatrix4("model", model);
 
-        tree.Draw(lightingShader);
+        ground.Draw(lightingShader);
+
+        for (unsigned int i = 0; i < 3; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, chairPositions[i]);
+            float angle = 20.0f * i;
+            model = quatRotation(model, glm::vec3(0.0f, 1.0f, 0.0f), angle);
+            model = glm::scale(model, glm::vec3(0.5f));
+            lightingShader.setmatrix4("model", model);
+            chair.Draw(lightingShader);
+        }
+
+        for (unsigned int i = 0; i < 3; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, treePositions[i]);
+            float angle = 20.0f * i;
+            model = quatRotation(model, glm::vec3(0.0f, 1.0f, 0.0f), angle);
+            lightingShader.setmatrix4("model", model);
+            tree.Draw(lightingShader);
+        }
 
         glBindVertexArray(0);
 
