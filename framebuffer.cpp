@@ -19,13 +19,16 @@ void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
-unsigned int loadTexture(const char *path);
 glm::mat4 quatRotation(glm::mat4 model, glm::vec3 axis, float angle);
 
-const GLuint WIDTH = 1200, HEIGHT = 720;
+void texGen(unsigned int *texture);
+void fboGen(unsigned int colorBufferTexture, unsigned int *fbo);
+
+const GLuint WIDTH = 1400, HEIGHT = 700;
 
 // camera
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
+Camera sideCam = Camera(glm::vec3(0.0f, 2.0f, 15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 float lastX = WIDTH / 2, lastY = HEIGHT / 2;
 bool firstMouse = true;
 
@@ -65,37 +68,11 @@ int main() {
     // set view port
     glViewport(0, 0, WIDTH, HEIGHT);
 
-    // creating a frame buffer object for offscreen rendering
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-    // generate texture to attach to fbo
-    unsigned int colBufferTex;
-    glGenTextures(1, &colBufferTex);
-    glBindTexture(GL_TEXTURE_2D, colBufferTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // attach texture to fbo
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colBufferTex, 0);
-
-    // creating a render buffer object for depth and stencil testing
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    // attach the rbo to fbo's depth and stencil buffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-    // check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: framebuffer is not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    unsigned int colBufferTex, framebuffer, colBufferTex2, framebuffer2;
+    texGen(&colBufferTex);
+    fboGen(colBufferTex, &framebuffer);
+    texGen(&colBufferTex2);
+    fboGen(colBufferTex2, &framebuffer2);
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
     stbi_set_flip_vertically_on_load(true);
@@ -118,15 +95,15 @@ int main() {
         glm::vec3(0.0f, 0.0f, -3.5f)};
 
     // plane to use for fbo
-    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+    float leftQuad[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
         -1.0f,  1.0f,  0.0f, 1.0f,
         -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+         0.0f, -1.0f,  1.0f, 0.0f,
 
         -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+         0.0f, -1.0f,  1.0f, 0.0f,
+         0.0f,  1.0f,  1.0f, 1.0f
     };
 
     unsigned int VAO, VBO;
@@ -135,7 +112,35 @@ int main() {
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(leftQuad), leftQuad, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // plane to use for other fbo
+    float rightQuad[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+         0.0f,  1.0f,  0.0f, 1.0f,
+         0.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+         0.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
+    unsigned int VAO2, VBO2;
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rightQuad), rightQuad, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
@@ -159,6 +164,8 @@ int main() {
         // check for input
         processInput(window);
 
+        // ------------------------
+        // left framebuffer
         // clear data for render and bind fbo
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -224,15 +231,85 @@ int main() {
             chair.Draw(shader);
         }
 
-        // second pass with basic framebuffer
+        // ------------------------
+        // right framebuffer
+        // clear data for render and bind fbo
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer2);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+
+        // activate shader
+        shader.use();
+
+        // set camera pos and material shininess
+        shader.set3f("viewPos", sideCam.Position);
+        shader.set1f("material.shininess", 64.0f);
+
+        // set directional light uniforms
+        shader.set3f("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        shader.set3f("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader.set3f("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5));
+        shader.set3f("dirLight.specular", glm::vec3(0.05f, 0.05f, 0.05f));
+
+        // set spotlight uniforms
+        shader.set3f("spotLight.position", camera.Position);
+        shader.set3f("spotLight.direction", camera.Front);
+        shader.set1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        shader.set1f("spotLight.outerCutOff", glm::cos(glm::radians(20.0f)));
+
+        shader.set3f("spotLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+        shader.set3f("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.set3f("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+        shader.set1f("spotLight.constant", 1.0f);
+        shader.set1f("spotLight.linear", 0.09f);
+        shader.set1f("spotLight.quadratic", 0.032f);
+
+        // pass projection matrix to shader
+        projection = glm::perspective(glm::radians(sideCam.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+        shader.setmatrix4("projection", projection);
+
+        // pass view transform matrix
+        view = sideCam.GetViewMatrix();
+        shader.setmatrix4("view", view);
+
+        model = glm::mat4(1.0f);
+        shader.setmatrix4("model", model);
+
+        ground.Draw(shader);
+
+        for (unsigned int i = 0; i < 3; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, treePositions[i]);
+            float angle = 20.0f * i;
+            model = quatRotation(model, glm::vec3(0.0f, 1.0f, 0.0f), angle);
+            shader.setmatrix4("model", model);
+            tree.Draw(shader);
+        }
+
+        for (unsigned int i = 0; i < 3; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, chairPositions[i]);
+            float angle = 20.0f * i;
+            model = quatRotation(model, glm::vec3(0.0f, 1.0f, 0.0f), angle);
+            model = glm::scale(model, glm::vec3(0.5f));
+            shader.setmatrix4("model", model);
+            chair.Draw(shader);
+        }
+
+        // draw framebuffer textures to planes
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glDisable(GL_DEPTH_TEST);
         fboShader.use();
         glBindVertexArray(VAO);
-        glDisable(GL_DEPTH_TEST);
         glBindTexture(GL_TEXTURE_2D, colBufferTex);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(VAO2);
+        glBindTexture(GL_TEXTURE_2D, colBufferTex2);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(0);
@@ -310,37 +387,33 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-// utility function for loading a 2D texture from file
-// ---------------------------------------------------
-unsigned int loadTexture(char const *path) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
+void texGen(unsigned int *texture) {
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D, *texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data) {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
+void fboGen(unsigned int colorBufferTexture, unsigned int *fbo) {
+    glGenFramebuffers(1, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
 
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBufferTexture, 0);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // creating a render buffer object for depth and stencil testing
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-        stbi_image_free(data);
-    } else {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
+    // attach the rbo to fbo's depth and stencil buffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
-    return textureID;
+    // check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

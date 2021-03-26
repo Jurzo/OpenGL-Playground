@@ -26,11 +26,11 @@ void main() {
         -1, -1, -1
     ); */
 
-    float edgeKernel[9] = float[](
+    /* float edgeKernel[9] = float[](
         1, 1, 1,
         1,-8, 1,
         1, 1, 1
-    );
+    ); */
 
     /* float blurKernel[9] = float[](
         1.0 / 16, 2.0 / 16, 1.0 / 16,
@@ -38,14 +38,15 @@ void main() {
         1.0 / 16, 2.0 / 16, 1.0 / 16  
     ); */
 
-    vec3 sampleTex[9];
+    /* vec3 sampleTex[9];
     for (int i = 0; i < 9; i++) {
         sampleTex[i] = vec3(texture(screenTexture, TexCoords.st + offsets[i]));
     }
     vec3 col = vec3(0.0);
     for (int i = 0; i < 9; i++) {
         col += sampleTex[i] * edgeKernel[i];
-    }
+    } */
+    vec3 col = vec3(texture(screenTexture, TexCoords));
 
     FragColor = vec4(col, 1.0);
 }
