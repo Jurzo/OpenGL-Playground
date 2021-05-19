@@ -191,7 +191,7 @@ int main() {
         shader.set1f("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         shader.set1f("spotLight.outerCutOff", glm::cos(glm::radians(20.0f)));
 
-        shader.set3f("spotLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+        shader.set3f("spotLight.ambient", glm::vec3(0.2f, 0.1f, 0.1f));
         shader.set3f("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
         shader.set3f("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
